@@ -1,0 +1,40 @@
+name: Bug report
+description: Laporkan bug tanpa membagikan secrets atau data pribadi
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "**Keamanan:** untuk kerentanan, gunakan pelaporan privat sesuai SECURITY.md, bukan Issue publik."
+  - type: input
+    id: version
+    attributes:
+      label: Versi Hermas
+      placeholder: v0.6.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Sistem operasi
+      options: [Linux, Windows, macOS, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah reproduksi
+      description: Jangan sertakan IP, credential, API key, .env, database, atau log mentah yang sensitif.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Hasil yang diharapkan
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Hasil yang terjadi
+    validations:
+      required: true

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Hermas Agentic AI — Workspace</title>
+  <link rel="stylesheet" href="/static/tailwind.css">
+  <script src="/static/feather.js" defer></script>
+  <style>
+    body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .scroll-slim::-webkit-scrollbar{width:6px}.scroll-slim::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    .pane{height:calc(100dvh - 0px)}
+    .message-pre{white-space:pre-wrap;overflow-wrap:anywhere}
+    #chatMessages{scroll-behavior:smooth}
+    #toast{transition:opacity .2s,transform .2s}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <section id="loginView" class="min-h-screen flex items-center justify-center p-5 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
+      <div class="w-14 h-14 flex items-center justify-center bg-indigo-600 rounded-2xl text-white mb-6"><i data-feather="cpu" class="w-7 h-7"></i></div>
+      <p class="text-xs uppercase tracking-[.22em] font-bold text-indigo-600">Private AI engineering workspace</p>
+      <h1 class="text-3xl font-bold tracking-tight mt-2">Hermas Agentic AI</h1>
+      <p class="text-slate-500 mt-2 text-sm leading-6">Agen coding berbasis persetujuan, memori terkontrol, dan audit aktivitas.</p>
+      <form id="loginForm" class="mt-7 space-y-4">
+        <label for="password" class="block text-sm font-semibold">Username dan password</label>
+        <input id="loginUsername" type="text" autocomplete="username" value="admin" required minlength="3" maxlength="32" placeholder="admin" class="block w-full border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3">
+        <input id="password" type="password" autocomplete="current-password" required minlength="12" placeholder="Masukkan password" class="block w-full border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <button class="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-xl py-3 font-semibold flex items-center justify-center gap-2"><i data-feather="log-in" class="w-4 h-4"></i> Masuk dashboard</button>
+        <p id="loginError" class="text-red-600 text-sm min-h-5" role="alert"></p>
+      </form>
+      <p class="text-xs text-slate-400 border-t border-slate-100 pt-5">Self-hosted · Admin utama + viewer/operator · SQLite lokal</p>
+    </div>
+  </section>
+
+  <div id="appView" class="hidden pane md:flex overflow-hidden">
+    <aside id="sidebar" class="absolute z-20 md:relative md:flex w-72 h-full flex-col bg-slate-950 text-slate-300 shadow-2xl md:shadow-none -translate-x-full md:translate-x-0 transition-transform">
+      <div class="p-5 border-b border-white/10">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-indigo-500 rounded-xl p-2.5 text-white"><i data-feather="cpu" class="w-5 h-5"></i></div>
+          <div><div class="font-bold text-white tracking-tight">Hermas Agentic AI</div><div class="text-[11px] text-slate-400">v0.6 · Intelligent Operations</div></div>
+          <button id="closeSidebar" class="md:hidden ml-auto text-slate-300" aria-label="Tutup menu"><i data-feather="x"></i></button>
+        </div>
+        <button id="newSession" class="w-full bg-indigo-600 hover:bg-indigo-500 rounded-xl px-4 py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 transition"><i data-feather="plus" class="w-4 h-4"></i> Percakapan baru</button>
+      </div>
+      <div class="px-5 pt-5 pb-2 flex items-center justify-between"><span class="text-[11px] uppercase tracking-widest font-bold text-slate-500">Riwayat</span><i data-feather="clock" class="w-3.5 h-3.5 text-slate-500"></i></div>
+      <nav id="sessionList" class="scroll-slim overflow-y-auto flex-1 px-3 space-y-1 pb-4" aria-label="Sesi"></nav>
+      <div class="border-t border-white/10 p-4 space-y-3">
+        <div class="bg-white/5 rounded-xl p-3 space-y-2">
+          <div class="flex justify-between text-xs"><span>Mode model</span><span id="modeLabel" class="font-semibold text-white">—</span></div>
+          <div class="flex justify-between text-xs"><span>Token hari ini</span><span id="tokenLabel" class="font-semibold text-white">0</span></div>
+          <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="tokenBar" class="h-full bg-indigo-400 rounded-full" style="width:0%"></div></div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-3 text-xs flex items-center justify-between"><span>Status tugas</span><span id="currentTaskStatus" class="font-semibold text-white">Tidak ada</span></div>
+        <button id="logoutButton" class="text-xs flex items-center gap-2 hover:text-white"><i data-feather="log-out" class="w-4 h-4"></i> Keluar</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 min-w-0 flex flex-col bg-slate-50">
+      <header class="h-[72px] flex-shrink-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <button id="openSidebar" class="md:hidden p-2" aria-label="Buka menu"><i data-feather="menu"></i></button>
+          <div><h2 class="font-bold text-slate-900 text-base sm:text-lg">Coding workspace</h2><p class="text-xs text-slate-500 truncate">Sandbox opsional · Human-in-the-loop</p></div>
+        </div>
+        <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-[72vw] md:max-w-none">
+          <button id="tasksButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Antrean tugas" aria-label="Antrean tugas"><i data-feather="list" class="w-5 h-5"></i></button>
+          <button id="metricsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Metrik" aria-label="Metrik"><i data-feather="activity" class="w-5 h-5"></i></button>
+          <button id="workflowButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Workflow Builder" aria-label="Workflow Builder"><i data-feather="git-merge" class="w-5 h-5"></i></button>
+          <button id="schedulerButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Cron Scheduler" aria-label="Cron Scheduler"><i data-feather="calendar" class="w-5 h-5"></i></button>
+          <button id="integrationsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Plugin & MCP Registry" aria-label="Integrations"><i data-feather="box" class="w-5 h-5"></i></button>
+          <button id="browserButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Browser Preview" aria-label="Browser"><i data-feather="globe" class="w-5 h-5"></i></button>
+          <button id="operationsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Intelligent Operations & Alerts" aria-label="Operations"><i data-feather="bell" class="w-5 h-5"></i></button>
+          <button id="accountsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Akun & RBAC" aria-label="Akun"><i data-feather="users" class="w-5 h-5"></i></button>
+          <button id="snapshotsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Snapshot Workspace" aria-label="Snapshot"><i data-feather="hard-drive" class="w-5 h-5"></i></button>
+          <button id="vpsButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="VPS Commander" aria-label="VPS Commander"><i data-feather="server" class="w-5 h-5"></i></button>
+          <button id="gitButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Git Coding Studio" aria-label="Git Coding Studio"><i data-feather="git-branch" class="w-5 h-5"></i></button>
+          <button id="memoryButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Memori tersimpan" aria-label="Memori"><i data-feather="database" class="w-5 h-5"></i></button>
+          <button id="skillButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Skills" aria-label="Skills"><i data-feather="layers" class="w-5 h-5"></i></button>
+          <button id="auditButton" class="rounded-xl hover:bg-slate-100 p-2.5 text-slate-600" title="Audit" aria-label="Audit"><i data-feather="shield" class="w-5 h-5"></i></button>
+          <span id="modePill" class="hidden sm:inline-flex ml-2 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5">Siap</span>
+        </div>
+      </header>
+      <div class="flex flex-col lg:flex-row flex-1 min-h-0">
+        <section class="flex-1 min-w-0 flex flex-col">
+          <div id="chatMessages" class="scroll-slim flex-1 overflow-y-auto px-4 sm:px-8 py-8 space-y-5" role="log" aria-live="polite">
+            <div class="max-w-2xl mx-auto mt-10 text-center"><div class="rounded-3xl w-16 h-16 mx-auto bg-indigo-100 text-indigo-600 flex items-center justify-center mb-5"><i data-feather="terminal"></i></div><h3 class="font-bold text-xl">Workspace siap digunakan</h3><p class="text-slate-500 mt-2 text-sm">Mulai chat, telusuri kode, atau ajukan perbaikan. Perubahan selalu memerlukan persetujuan.</p></div>
+          </div>
+          <form id="chatForm" class="flex-shrink-0 border-t bg-white border-slate-200 px-4 sm:px-8 py-4">
+            <div class="max-w-4xl mx-auto mb-3 flex items-center justify-between gap-3">
+              <label for="multiAgentMode" class="flex items-center gap-2 text-xs text-slate-600 font-semibold cursor-pointer">
+                <input id="multiAgentMode" type="checkbox" class="text-indigo-600 w-4 h-4">
+                Multi-Agent Review <span class="hidden sm:inline font-normal text-slate-400">(Planner → Coder → Reviewer; usulan saja)</span>
+              </label>
+              <span class="text-[11px] text-indigo-600 font-semibold">v0.6</span>
+            </div>
+            <div class="max-w-4xl mx-auto flex gap-2 items-end border border-slate-200 rounded-2xl shadow-sm p-2 focus-within:ring-2 focus-within:ring-indigo-100">
+              <textarea id="chatInput" rows="2" required maxlength="10000" placeholder="Tanyakan kode, audit proyek, atau ajukan perubahan..." class="flex-1 min-w-0 resize-none px-3 py-2.5 outline-none text-sm max-h-44" aria-label="Pesan"></textarea>
+              <button id="sendButton" class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-xl h-11 w-11 flex-shrink-0 grid place-items-center" title="Kirim" aria-label="Kirim"><i data-feather="arrow-up" class="w-5 h-5"></i></button>
+            </div>
+            <p class="max-w-4xl mx-auto mt-2 text-center text-[11px] text-slate-400">Mode multi-agent menghasilkan rencana saja. Tinjau diff sebelum menyetujui perubahan. Jangan masukkan password atau API key ke percakapan.</p>
+          </form>
+        </section>
+        <aside class="border-t lg:border-t-0 lg:border-l border-slate-200 bg-white w-full lg:w-[370px] max-h-[36vh] lg:max-h-none lg:h-full flex flex-col min-h-0">
+          <div class="p-5 border-b flex items-center justify-between"><div><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-feather="check-square" class="w-4 h-4 text-indigo-600"></i> Review actions</h3><p class="text-xs text-slate-500 mt-1">Risk review · diff lengkap · fail-closed.</p></div><span id="approvalCount" class="bg-slate-100 rounded-full px-2.5 py-1 text-xs font-bold">0</span></div>
+          <div id="approvalList" class="scroll-slim flex-1 overflow-y-auto p-4 space-y-4"><p class="text-slate-400 text-sm text-center py-8">Tidak ada tindakan menunggu.</p></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <div id="overlay" class="hidden fixed inset-0 z-30 bg-slate-950/50 p-4 items-center justify-center">
+    <section class="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="p-5 border-b flex justify-between"><h3 id="modalTitle" class="text-lg font-bold">Info</h3><button id="closeModal" aria-label="Tutup" class="p-2 hover:bg-slate-100 rounded-lg"><i data-feather="x"></i></button></div>
+      <div id="modalContent" class="scroll-slim overflow-y-auto p-5 text-sm space-y-3"></div>
+    </section>
+  </div>
+  <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 translate-y-2 opacity-0 z-50 bg-slate-950 text-white rounded-xl shadow-lg px-5 py-3 text-sm max-w-[90vw]"></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

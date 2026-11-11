@@ -1,0 +1,46 @@
+# Private configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+known_hosts
+
+# Runtime data (credentials, logs, sessions, snapshots, backups)
+data/
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.log
+logs/
+backups/
+*.bak
+
+# Python and testing
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.py[cod]
+.venv/
+venv/
+.envrc
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Workspace contains user code and may contain secrets.
+workspace/*
+!workspace/README.md
+!workspace/contoh.php
